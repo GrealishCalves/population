@@ -1,0 +1,39 @@
+import { Injectable } from '@nestjs/common';
+import { lastValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
+
+export type Nation = {
+  data: data[];
+  source: Array<any>;
+};
+
+export type data = {
+  Nation: string;
+  year: string;
+  Population: number;
+};
+
+@Injectable()
+export class InvokeDataService {
+  constructor(private httpService: HttpService) {}
+
+  public getPopulation(obj: any): Promise<Nation> {
+    const year = this.getYear(obj);
+    const population = this.getPopulationData(year);
+    return population;
+  }
+
+  private getYear(obj: any): string {
+    const year = obj.year;
+    return year;
+  }
+
+  private async getPopulationData(year): Promise<Nation> {
+    const response = await lastValueFrom(
+      this.httpService.get(
+        `https://datausa.io/api/data?drilldowns=Nation&measures=Population&year=${year}`,
+      ),
+    );
+    return response.data;
+  }
+}
